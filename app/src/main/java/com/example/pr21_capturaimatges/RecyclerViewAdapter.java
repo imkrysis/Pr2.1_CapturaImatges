@@ -13,9 +13,10 @@ import java.util.ArrayList;
 
 import javax.xml.transform.Result;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> implements View.OnClickListener {
 
     static ArrayList<Photo> photosList;
+    public View.OnClickListener onClickListener;
 
     RecyclerViewAdapter(ArrayList<Photo> photosList) {
 
@@ -39,7 +40,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         public void setData(Photo photosData) {
 
-            this.textViewPhotoName.setText(photosData.getFileName());
+            this.textViewPhotoName.setText(photosData.getFileName().substring(0, photosData.getFileName().indexOf(".")));
             this.imageViewPhotoThumbnail.setImageBitmap(photosData.getPhotoBitmap());
 
         }
@@ -51,6 +52,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_photos_list, null, false);
+
+        view.setOnClickListener(this);
 
         return new ViewHolder(view);
 
@@ -69,4 +72,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return photosList.size();
 
     }
+
+    public void setOnClickListener(View.OnClickListener onClickListener) {
+
+        this.onClickListener = onClickListener;
+
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        if (onClickListener != null) {
+
+            onClickListener.onClick(v);
+
+        }
+
+    }
+
 }

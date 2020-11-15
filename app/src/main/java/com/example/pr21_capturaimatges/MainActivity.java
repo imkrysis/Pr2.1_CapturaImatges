@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
@@ -26,18 +27,19 @@ import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<Photo> photosList = new ArrayList<Photo>();
-
     final File filesDir = new File ("/data/user/0/com.example.pr21_capturaimatges/files");
     final File photoDir = new File("/data/user/0/com.example.pr21_capturaimatges/files/photos");
+    final File mainPhotoFile = new File("/data/user/0/com.example.pr21_capturaimatges/files/main.jpeg");
     final String photoExt = ".jpeg";
+
+    ArrayList<Photo> photosList = new ArrayList<Photo>();
+
     File photoFile;
+    String nickname;
+    Bitmap photoBitmap;
 
     ImageView imageViewPhoto;
     EditText editTextName;
-
-    String nickname;
-    Bitmap photoBitmap;
 
     AlertDialog.Builder adb;
     AlertDialog adFoundPhoto;
@@ -51,15 +53,16 @@ public class MainActivity extends AppCompatActivity {
 
         editTextName = findViewById(R.id.editTextName);
 
-        checkDir();
-
         try {
 
+            checkDir();
+            checkMainPhoto();
             getPhotoList();
 
         } catch (FileNotFoundException e) {
 
             e.printStackTrace();
+
         }
 
         setFoundPhotoDialog();
@@ -86,9 +89,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void checkMainPhoto() throws FileNotFoundException { // Comprobamos si el usuario ha escogido foto predeterminada para mostrar en la aplicacion, en ese caso la mostramos.
+
+        if (mainPhotoFile.exists()) {
+
+            imageViewPhoto.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(mainPhotoFile)));
+
+        }
+
+    }
+
     public void checkingName(View v) { // Comprobamos si existe ya una foto almacenada con ese nombre y en ese caso lanzamos un dialogo. Si aun no existe la foto, llamamos a la funcion para capturarla.
 
-        if (editTextName.getText().toString().equals("")) {
+        if (editTextName.getText().toString().equals("main")) {
+
+            editTextName.setText("");
+
+            Toast.makeText(getApplicationContext(), "Palabra reservada, introduce otro nombre.", Toast.LENGTH_SHORT).show();
+
+            return;
+
+        } else if(editTextName.getText().toString().equals("")) {
 
             Toast.makeText(getApplicationContext(), "Introduce un nombre...", Toast.LENGTH_SHORT).show();
 
@@ -133,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             Bundle extras = takePictureIntent.getExtras();
             photoBitmap = (Bitmap) extras.get("data");
 
-            imageViewPhoto.setImageBitmap(photoBitmap);
+            editTextName.setText("");
 
             savePhoto();
 
@@ -230,8 +251,6 @@ public class MainActivity extends AppCompatActivity {
 
                     System.out.println("Replacing Photo " + (i+1) + " " + photosList.get(i).getFileName() + " ...");
 
-                    printPhotoList();
-
                     return;
 
                 }
@@ -258,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void printPhotoList() {
+    public void printPhotoList() { // Esta funcion es unicamente para que nos muestre por consola las fotos disponibles, para facilitarnos saber que esta pasando en el programa.
 
         for (int i = 0; i < photosList.size(); i++) {
 
@@ -273,8 +292,6 @@ public class MainActivity extends AppCompatActivity {
         if (photosList.size() > 0) {
 
             Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
-
-            intent.putParcelableArrayListExtra("PHOTOS_LIST", photosList);
 
             startActivity(intent);
 
